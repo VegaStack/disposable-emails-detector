@@ -1,12 +1,12 @@
-# Disposable Email Domains Detector by VegaStack
+# Free Disposable Email Domains Detection API by VegaStack
 
 [![Disposable Email Domains Blocklist Daily Update](https://github.com/VegaStack/disposable-emails-detector/actions/workflows/daily.yml/badge.svg)](https://github.com/VegaStack/disposable-emails-detector/actions/workflows/daily.yml)
 
-A comprehensive and automatically updated blocklist of disposable email domains to help prevent spam and abuse in your applications.
+Free API to detect and block disposable email domains. Automatically updated blocklist to reduce spam, improve security, and keep your app’s data clean.
 
 ## 📋 Overview
 
-This repository maintains a consolidated list of over 100,000 disposable email domains that are commonly used for temporary email services, spam, and abuse. The list is automatically updated daily by merging data from multiple trusted public sources.
+This repository maintains a consolidated list of over 100,000 disposable email domains that are commonly used for temporary email services, spam, and abuse. The list is automatically updated daily by merging data from multiple trusted public sources. Use the Free API to detect and block disposable email domains.
 
 ## 🌐 Try It Online
 
