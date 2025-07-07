@@ -346,10 +346,9 @@ Based on [API security best practices](https://dev.to/zuplo/8-essential-api-secu
 ## ⚠️ Important Notes
 
 - **API Recommended**: Use `https://disposable-emails-detector.vegastack.com/api/check.json` for optimal performance and real-time checking
-- **Optimized Response**: 30% smaller payload than previous versions for faster loading
 - **Performance**: Domains are pre-sorted alphabetically for optimal lookup performance. API provides O(1) hash-based lookups
 - **Multiple Formats**: Use API for web applications, JSON format for bulk processing, CSV for data analysis, or TXT for simple scripts
-- **Reliability**: Custom domain hosted on Cloudflare with 99.9% uptime, automatic SSL, and global CDN
+- **Reliability**: Hosted on Cloudflare with 99.9% uptime, automatic SSL, and global CDN
 - **Error Handling**: All API examples include proper error handling and fallback logic
 - **False Positives**: Some legitimate services might be included; use our [issue template](.github/ISSUE_TEMPLATE/false-positive.md) to report them
 - **Regular Updates**: The list is updated daily with automatic validation and error handling
@@ -365,7 +364,7 @@ The consolidated blocklist data is provided as-is for the benefit of the communi
 - [disposable/disposable-email-domains](https://github.com/disposable/disposable-email-domains)
 - [StopForumSpam](https://www.stopforumspam.com/)
 
-## 📞 Support
+## 🎧 Support
 
 If you encounter issues or have questions:
 - Open an [issue](../../issues) in this repository

@@ -136,18 +136,7 @@ API documentation and usage information.
 }
 ```
 
-## Performance
-
-- **Response Time:** < 100ms globally (Cloudflare CDN)
-- **Uptime:** 99.9% availability  
-- **Rate Limits:** 100GB/month bandwidth (generous for most use cases)
-- **Lookup Method:** O(1) hash table for instant domain checking
-- **Caching:** Responses cached globally for optimal performance
-- **Payload Size:** ~30% smaller than previous version (optimized JSON structure)
-
 ## Security & Rate Limiting
-
-Based on [API security best practices](https://dev.to/zuplo/8-essential-api-security-best-practices-47fk), this API includes:
 
 - **CORS Enabled:** Cross-origin requests allowed from all domains
 - **Security Headers:** X-Content-Type-Options, X-Frame-Options, X-XSS-Protection
