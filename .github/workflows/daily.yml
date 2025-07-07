@@ -1,0 +1,307 @@
+# Daily automated update of disposable email domains blocklist from multiple trusted sources
+name: Merge Disposable Email Domains Blocklist from Public Sources
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight UTC
+  workflow_dispatch: # Allow manual runs
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    permissions:                
+      contents: write # Required to commit updated blocklist
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup directories
+      run: |
+        mkdir -p sources
+        mkdir -p outputs
+
+    - name: Download blocklists from sources with retry
+      run: |
+        # Function to download with retry
+        download_with_retry() {
+          local url=$1
+          local output=$2
+          local retries=3
+          local delay=5
+          
+          for ((i=1; i<=retries; i++)); do
+            echo "Attempt $i/$retries for $url"
+            if curl -f -s -o "$output" "$url"; then
+              echo "✅ Successfully downloaded: $url"
+              return 0
+            else
+              echo "❌ Failed to download: $url (attempt $i/$retries)"
+              if [ $i -lt $retries ]; then
+                echo "Retrying in $delay seconds..."
+                sleep $delay
+              fi
+            fi
+          done
+          echo "🚫 Failed to download after $retries attempts: $url"
+          return 1
+        }
+
+        # Download from all sources
+        success_count=0
+        total_sources=4
+
+        if download_with_retry "https://disposable.github.io/disposable-email-domains/domains.txt" "sources/disposable_email_blocklist-2.txt"; then
+          ((success_count++))
+        fi
+
+        if download_with_retry "https://raw.githubusercontent.com/disposable/disposable-email-domains/master/domains.txt" "sources/disposable_email_blocklist-3.txt"; then
+          ((success_count++))
+        fi
+
+        if download_with_retry "https://www.stopforumspam.com/downloads/toxic_domains_whole.txt" "sources/stopforumspam_domains.txt"; then
+          ((success_count++))
+        fi
+
+        if download_with_retry "https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/master/disposable_email_blocklist.conf" "sources/disposable_email_blocklist.txt"; then
+          ((success_count++))
+        fi
+
+        echo "Successfully downloaded $success_count/$total_sources sources"
+        
+        # Ensure we have at least 2 sources to proceed
+        if [ $success_count -lt 2 ]; then
+          echo "❌ Error: Only $success_count sources available. Need at least 2 to proceed safely."
+          exit 1
+        fi
+
+    - name: Merge and validate sources
+      run: |
+        # Merge all available sources
+        cat sources/*.txt > daily_disposable_blocklist.txt 2>/dev/null || true
+        
+        # Validate merged file
+        if [ ! -s daily_disposable_blocklist.txt ]; then
+          echo "❌ Error: Merged file is empty!"
+          exit 1
+        fi
+        
+        initial_count=$(wc -l < daily_disposable_blocklist.txt)
+        echo "Initial merged domains: $initial_count"
+        
+        if [ $initial_count -lt 10000 ]; then
+          echo "❌ Error: Suspiciously low domain count ($initial_count). Expected at least 10,000 domains."
+          exit 1
+        fi
+
+    - name: Process and sort domains
+      run: |
+        # Remove duplicates, sort alphabetically, and filter valid domains
+        # More robust domain filtering: removes comments, empty lines, and validates domain format
+        sort daily_disposable_blocklist.txt | uniq | \
+          grep -v '^#' | \
+          grep -v '^$' | \
+          grep -v '^\s*$' | \
+          grep -E '^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$' | \
+          tr -d '\r' | \
+          sed 's/[[:space:]]*$//' > disposable_email_domains_blocklist.txt
+        
+        # Validate final file
+        final_count=$(wc -l < disposable_email_domains_blocklist.txt)
+        echo "Final processed domains: $final_count"
+        
+        if [ $final_count -lt 5000 ]; then
+          echo "❌ Error: Final domain count too low ($final_count). Something went wrong."
+          exit 1
+        fi
+        
+        # Additional validation - verify file contains valid domains
+        if ! head -10 disposable_email_domains_blocklist.txt | grep -q '\.'; then
+          echo "❌ Error: File doesn't appear to contain valid domains"
+          exit 1
+        fi
+
+    - name: Generate multiple output formats and API
+      run: |
+        # Create CNAME file for custom domain
+        echo "disposable-emails-detector.vegastack.com" > CNAME
+        
+        # Generate JSON format with proper escaping
+        echo '{"domains": [' > outputs/disposable_email_domains.json
+        # Use awk for proper JSON escaping
+        awk 'BEGIN{first=1} {if(first) first=0; else print ","; printf "  \"%s\"", $0} END{print ""}' disposable_email_domains_blocklist.txt >> outputs/disposable_email_domains.json
+        echo ']}' >> outputs/disposable_email_domains.json
+        
+        # Validate JSON format
+        if ! python3 -c "import json; json.load(open('outputs/disposable_email_domains.json'))" 2>/dev/null; then
+          echo "❌ Error: Generated JSON is invalid"
+          exit 1
+        fi
+        
+        # Generate API endpoints with custom domain reference
+        mkdir -p api
+        current_count=$(wc -l < disposable_email_domains_blocklist.txt)
+        
+        # Main API endpoint for domain checking - optimized for production
+        echo '{' > api/check.json
+        echo '  "v": "1.0",' >> api/check.json
+        echo '  "updated": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",' >> api/check.json
+        echo '  "count": '$current_count',' >> api/check.json
+        echo '  "domains": {' >> api/check.json
+        awk 'BEGIN{first=1} {if(first) first=0; else print ","; printf "    \"%s\": 1", $0}' disposable_email_domains_blocklist.txt >> api/check.json
+        echo '' >> api/check.json
+        echo '  }' >> api/check.json
+        echo '}' >> api/check.json
+        
+        # Statistics API endpoint - optimized and secure
+        echo '{' > api/stats.json
+        echo '  "v": "1.0",' >> api/stats.json
+        echo '  "endpoint": "https://disposable-emails-detector.vegastack.com",' >> api/stats.json
+        echo '  "count": '$current_count',' >> api/stats.json
+        echo '  "updated": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",' >> api/stats.json
+        echo '  "sources": ['$(ls sources/*.txt 2>/dev/null | wc -l)'],' >> api/stats.json
+        echo '  "formats": ["txt", "json", "csv", "api"],' >> api/stats.json
+        echo '  "rate_limit": "100GB/month"' >> api/stats.json
+        echo '}' >> api/stats.json
+        
+        # Generate security headers and configuration
+        echo '{"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "X-XSS-Protection": "1; mode=block", "Referrer-Policy": "strict-origin-when-cross-origin"}' > api/_headers.json
+        
+        # Generate API documentation endpoint
+        echo '{' > api/info.json
+        echo '  "api": {' >> api/info.json
+        echo '    "version": "1.0",' >> api/info.json
+        echo '    "name": "Disposable Email Domains API",' >> api/info.json
+        echo '    "description": "Fast, reliable disposable email detection",' >> api/info.json
+        echo '    "base_url": "https://disposable-emails-detector.vegastack.com",' >> api/info.json
+        echo '    "rate_limit": "100GB/month bandwidth limit",' >> api/info.json
+        echo '    "cors": "Enabled for all origins"' >> api/info.json
+        echo '  },' >> api/info.json
+        echo '  "endpoints": {' >> api/info.json
+        echo '    "check": "/api/check.json",' >> api/info.json
+        echo '    "stats": "/api/stats.json",' >> api/info.json
+        echo '    "info": "/api/info.json"' >> api/info.json
+        echo '  },' >> api/info.json
+        echo '  "usage": {' >> api/info.json
+        echo '    "check_domain": "api.domains[\"example.com\"] === 1",' >> api/info.json
+        echo '    "get_count": "api.count",' >> api/info.json
+        echo '    "last_updated": "api.updated"' >> api/info.json
+        echo '  }' >> api/info.json
+        echo '}' >> api/info.json
+        
+        # Validate API JSON files
+        for file in api/*.json; do
+          if [[ "$file" != *"_headers.json" ]]; then
+            if ! python3 -c "import json; json.load(open('$file'))" 2>/dev/null; then
+              echo "❌ Error: Invalid JSON in $file"
+              exit 1
+            fi
+          fi
+        done
+        
+        # Generate CSV format
+        echo "domain" > outputs/disposable_email_domains.csv
+        cat disposable_email_domains_blocklist.txt >> outputs/disposable_email_domains.csv
+        
+        # Generate stats and changelog
+        current_count=$(wc -l < disposable_email_domains_blocklist.txt)
+        previous_count=0
+        
+        if [ -f STATS.md ]; then
+          previous_count=$(grep "Total Domains:" STATS.md | head -1 | grep -o '[0-9,]*' | tr -d ',' || echo "0")
+        fi
+        
+        change=$((current_count - previous_count))
+        
+        # Generate stats file
+        echo "# Disposable Email Domains Statistics" > STATS.md
+        echo "" >> STATS.md
+        echo "## Current Status" >> STATS.md
+        echo "- **Total Domains**: $(printf "%'d" $current_count)" >> STATS.md
+        echo "- **Last Updated**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> STATS.md
+        echo "- **Change from Previous**: $(if [ $change -gt 0 ]; then echo "+$change"; elif [ $change -lt 0 ]; then echo "$change"; else echo "0"; fi)" >> STATS.md
+        echo "" >> STATS.md
+        echo "## File Formats Available" >> STATS.md
+        echo "- **Text**: \`disposable_email_domains_blocklist.txt\`" >> STATS.md
+        echo "- **JSON**: \`outputs/disposable_email_domains.json\`" >> STATS.md
+        echo "- **CSV**: \`outputs/disposable_email_domains.csv\`" >> STATS.md
+        echo "" >> STATS.md
+        echo "## API Endpoints" >> STATS.md
+        echo "- **Main API**: https://disposable-emails-detector.vegastack.com/api/check.json" >> STATS.md
+        echo "- **Statistics**: https://disposable-emails-detector.vegastack.com/api/stats.json" >> STATS.md
+        echo "- **Raw Data**: https://disposable-emails-detector.vegastack.com/outputs/disposable_email_domains.json" >> STATS.md
+        echo "" >> STATS.md
+        echo "## Sources Status" >> STATS.md
+        # List source files with their domain counts
+        if [ -d sources ] && [ "$(ls -A sources)" ]; then
+          for file in sources/*.txt; do
+            if [ -f "$file" ]; then
+              count=$(wc -l < "$file" 2>/dev/null || echo "0")
+              basename=$(basename "$file")
+              echo "- $basename: $(printf "%'d" $count) domains" >> STATS.md
+            fi
+          done
+        else
+          echo "- Source information unavailable" >> STATS.md
+        fi
+        echo "" >> STATS.md
+
+        # Generate changelog entry
+        if [ ! -f CHANGELOG.md ]; then
+          echo "# Changelog" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+        fi
+        
+        # Add today's entry to changelog
+        today=$(date -u '+%Y-%m-%d')
+        if ! grep -q "## $today" CHANGELOG.md; then
+          sed -i "2i\\## $today\n- Updated blocklist with $(printf "%'d" $current_count) domains (change: $(if [ $change -gt 0 ]; then echo "+$change"; elif [ $change -lt 0 ]; then echo "$change"; else echo "0"; fi))\n" CHANGELOG.md
+        fi
+
+    - name: Commit updated files
+      run: |
+        # Configure git
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        # Add files to git
+        git add disposable_email_domains_blocklist.txt outputs/ api/ CNAME STATS.md CHANGELOG.md API.md
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          # Commit with error handling
+          domain_count=$(wc -l < disposable_email_domains_blocklist.txt)
+          commit_message="Daily update: $(printf "%'d" $domain_count) domains ($(date -u '+%Y-%m-%d'))"
+          
+          if ! git commit -m "$commit_message"; then
+            echo "❌ Error: Failed to commit changes"
+            exit 1
+          fi
+          
+          echo "✅ Successfully committed changes"
+        fi
+        
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+
+    - name: Report status and cleanup
+      run: |
+        echo "✅ Workflow completed successfully!"
+        echo "Final domain count: $(wc -l < disposable_email_domains_blocklist.txt)"
+        echo "Custom domain: https://disposable-emails-detector.vegastack.com"
+        echo "Files generated:"
+        ls -la disposable_email_domains_blocklist.txt outputs/ api/ CNAME STATS.md CHANGELOG.md
+        echo "API endpoints available at:"
+        echo "- https://disposable-emails-detector.vegastack.com/api/check.json"
+        echo "- https://disposable-emails-detector.vegastack.com/api/stats.json"
+        
+        # Cleanup temporary files
+        rm -f daily_disposable_blocklist.txt
+        rm -rf sources/
+        echo "🧹 Cleaned up temporary files"
+

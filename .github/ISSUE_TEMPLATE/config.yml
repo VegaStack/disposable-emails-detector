@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/disposable-email-domains/disposable-email-domains-main/blob/main/README.md
+    about: Read the project documentation and usage examples
+  - name: 💬 General Discussion
+    url: https://github.com/disposable-email-domains/disposable-email-domains-main/discussions
+    about: Ask questions and discuss the project with the community
+  - name: 🔗 Related Projects
+    url: https://github.com/disposable/disposable-email-domains
+    about: Check out the original disposable email domains project 
