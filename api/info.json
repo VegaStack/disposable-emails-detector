@@ -1,0 +1,20 @@
+{
+  "api": {
+    "version": "1.0",
+    "name": "Disposable Email Domains API",
+    "description": "Fast, reliable disposable email detection",
+    "base_url": "https://disposable-emails-detector.vegastack.com",
+    "rate_limit": "100GB/month bandwidth limit",
+    "cors": "Enabled for all origins"
+  },
+  "endpoints": {
+    "check": "/api/check.json",
+    "stats": "/api/stats.json",
+    "info": "/api/info.json"
+  },
+  "usage": {
+    "check_domain": "api.domains[\"example.com\"] === 1",
+    "get_count": "api.count",
+    "last_updated": "api.updated"
+  }
+}
