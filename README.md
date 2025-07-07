@@ -39,13 +39,6 @@ The workflow automatically:
 6. Creates statistics and changelog files
 7. Commits the updated files to the repository
 
-**Reliability Features:**
-- ✅ **Retry Logic**: 3 attempts per source with exponential backoff
-- ✅ **Error Handling**: Graceful handling of source failures
-- ✅ **Data Validation**: Ensures minimum domain counts and file integrity
-- ✅ **Multiple Formats**: Automatic generation of JSON and CSV formats
-- ✅ **Change Tracking**: Daily statistics and changelog generation
-
 ## 🚀 Usage
 
 ### Quick Start - API Usage
@@ -116,14 +109,6 @@ curl https://disposable-emails-detector.vegastack.com/api/info.json
 ```
 
 📖 **[Complete API Documentation](API.md)**
-
-### ⚡ **Performance Optimization**
-
-**API Response Optimization:**
-- Reduced field names: `domains_hash` → `domains`, `total_domains` → `count`
-- Smaller values: `true` → `1` (saves 3 bytes per domain)
-- Removed bloat: No unnecessary `api_info` metadata
-- **Result: ~30% smaller payload = faster loading**
 
 ### Programming Examples
 

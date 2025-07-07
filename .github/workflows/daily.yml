@@ -30,7 +30,7 @@ jobs:
           local retries=3
           local delay=5
           
-          for ((i=1; i<=retries; i++)); do
+          for i in $(seq 1 $retries); do
             echo "Attempt $i/$retries for $url"
             if curl -f -s -o "$output" "$url"; then
               echo "✅ Successfully downloaded: $url"
@@ -52,19 +52,19 @@ jobs:
         total_sources=4
 
         if download_with_retry "https://disposable.github.io/disposable-email-domains/domains.txt" "sources/disposable_email_blocklist-2.txt"; then
-          ((success_count++))
+          success_count=$((success_count + 1))
         fi
 
         if download_with_retry "https://raw.githubusercontent.com/disposable/disposable-email-domains/master/domains.txt" "sources/disposable_email_blocklist-3.txt"; then
-          ((success_count++))
+          success_count=$((success_count + 1))
         fi
 
         if download_with_retry "https://www.stopforumspam.com/downloads/toxic_domains_whole.txt" "sources/stopforumspam_domains.txt"; then
-          ((success_count++))
+          success_count=$((success_count + 1))
         fi
 
         if download_with_retry "https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/master/disposable_email_blocklist.conf" "sources/disposable_email_blocklist.txt"; then
-          ((success_count++))
+          success_count=$((success_count + 1))
         fi
 
         echo "Successfully downloaded $success_count/$total_sources sources"
