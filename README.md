@@ -1,10 +1,27 @@
-# Disposable Email Domains Blocklist
+# Disposable Email Domains Detector by VegaStack
+
+[![Disposable Email Domains Blocklist Daily Update](https://github.com/VegaStack/disposable-emails-detector/actions/workflows/daily.yml/badge.svg)](https://github.com/VegaStack/disposable-emails-detector/actions/workflows/daily.yml)
 
 A comprehensive and automatically updated blocklist of disposable email domains to help prevent spam and abuse in your applications.
 
 ## 📋 Overview
 
 This repository maintains a consolidated list of over 100,000 disposable email domains that are commonly used for temporary email services, spam, and abuse. The list is automatically updated daily by merging data from multiple trusted public sources.
+
+## 🌐 Try It Online
+
+Test the disposable email detector with our web interface:
+
+**🚀 [Live Demo: https://disposable-emails-detector.vegastack.com](https://disposable-emails-detector.vegastack.com)**
+
+- **Instant Domain Checking**: Test any email domain or full email address
+- **Real-time Results**: Powered by our optimized API with 100k+ domains
+- **Shareable URLs**: Share specific domain checks with query parameters
+- **Professional Interface**: Clean, fast, and mobile-friendly
+
+You can also check domains directly via URL:
+- `https://disposable-emails-detector.vegastack.com/?domain=10minutemail.com`
+- `https://disposable-emails-detector.vegastack.com/?domain=gmail.com`
 
 ## 🎯 Purpose
 

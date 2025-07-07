@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disposable Email Domains Detector by VegaStack</title>
+    <meta name="description" content="Detect disposable email domains instantly. Block temporary email services, improve data quality, and enhance security with our comprehensive API tracking 100k+ email domains.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+    <style>
+        :root {
+            /* Core colors from design system */
+            --background: #FFFFFF;
+            --background-secondary: #FAFAFA;
+            --background-tertiary: #F5F5F5;
+            --foreground: #000000;
+            --primary: #000000;
+            --primary-foreground: #FFFFFF;
+            --secondary: #D9D9D9;
+            --secondary-foreground: #7A7A7A;
+            --muted: #E4E4E4;
+            --muted-foreground: #7A7A7A;
+            --border: #E4E4E4;
+            --border-secondary: #D9D9D9;
+            --hover-primarybutton: #434343;
+            --hover-outlinebutton: #E4E4E4;
+            
+            /* Status colors */
+            --background-red: #FFEBE9;
+            --foreground-red: #A40E26;
+            --background-green: #DAFBE1;
+            --foreground-green: #1A7F37;
+            --background-orange: #FFF7ED;
+            --foreground-orange: #EA580C;
+            
+            /* Radius */
+            --radius: 6px;
+            --radius-full: 9999px;
+            --radius-xl: 1.5rem;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 2rem 0 2rem 0;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--foreground);
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--secondary-foreground);
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Checker Card */
+        .checker-card {
+            background: var(--background-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            font-size: 16px;
+            background: var(--background);
+            color: var(--foreground);
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--secondary-foreground);
+        }
+        
+        input[type="text"]::placeholder {
+            color: var(--muted-foreground);
+        }
+        
+        button {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: var(--hover-primarybutton);
+        }
+        
+        button:disabled {
+            background: var(--muted);
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+            display: none;
+        }
+        
+        .result.disposable {
+            background: var(--background-red);
+            color: var(--foreground-red);
+            border: 1px solid var(--background-red);
+        }
+        
+        .result.clean {
+            background: var(--background-green);
+            color: var(--foreground-green);
+            border: 1px solid var(--background-green);
+        }
+        
+        .result.error {
+            background: var(--background-orange);
+            color: var(--foreground-orange);
+            border: 1px solid var(--background-orange);
+        }
+        
+        .stats {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--background-tertiary);
+            border-radius: var(--radius);
+            color: var(--secondary-foreground);
+            font-size: 0.9rem;
+        }
+        
+        .share-url {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--background-tertiary);
+            border-radius: var(--radius);
+            font-family: ui-monospace, monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            color: var(--secondary-foreground);
+        }
+        
+        /* Documentation Section */
+        .docs-section {
+            border-top: 1px solid var(--border);
+            padding-top: 4rem;
+            margin-top: 4rem;
+        }
+        
+        .docs-section h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--foreground);
+        }
+        
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .doc-card {
+            background: var(--background-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+        }
+        
+        .doc-card:hover {
+            background: var(--background-tertiary);
+            border-color: var(--border-secondary);
+        }
+        
+        .doc-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--foreground);
+        }
+        
+        .doc-card p {
+            color: var(--secondary-foreground);
+            font-size: 0.95rem;
+        }
+        
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding-top: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+        }
+        
+        .footer p {
+            color: var(--secondary-foreground);
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: var(--foreground);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer-logo {
+            margin-bottom: 1rem;
+        }
+        
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--background-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: var(--foreground);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .github-link:hover {
+            background: var(--background-tertiary);
+            border-color: var(--border-secondary);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+        
+        /* Override footer link underline for GitHub button */
+        .footer .github-link,
+        .footer .github-link:hover {
+            text-decoration: none !important;
+        }
+        
+        .github-star {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .footer-logo img {
+            height: 20px;
+            width: auto;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+        
+        .footer-logo img:hover {
+            opacity: 0.9;
+        }
+        
+        /* VegaStack link in heading */
+        .hero h1 a:hover {
+            color: var(--primary) !important;
+            text-decoration: underline !important;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .hero {
+                padding: 2rem 0;
+            }
+            
+            .docs-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .github-link {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="github-star">
+                <a href="https://github.com/VegaStack/disposable-emails-detector" target="_blank" class="github-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    Star on GitHub
+                </a>
+            </div>
+            <h1>🛡️ Disposable Email Domains Detector <span style="color: var(--secondary-foreground); font-weight: 500;">by <a href="https://vegastack.com/?utm_source=disposable-emails-detector.vegastack.com" target="_blank" style="color: inherit; text-decoration: none;">VegaStack</a></span></h1>
+            <p>Detect and block disposable email domains instantly. Our service identifies temporary email services to improve data quality, enhance security, and reduce spam with our comprehensive database of 100k+ tracked email domains.</p>
+        </section>
+
+        <!-- Domain Checker Card -->
+        <div class="checker-card">
+            <div class="input-group">
+                <input type="text" id="domainInput" placeholder="Enter email domain or full email (e.g., 10minutemail.com or user@tempmail.org)" />
+            </div>
+            
+            <button onclick="checkDomain()" id="checkBtn">Check Email Domain</button>
+            
+            <div id="result" class="result"></div>
+            
+            <div id="stats" class="stats">
+                <div style="color: var(--secondary-foreground); font-style: italic;">Loading email domain database statistics...</div>
+            </div>
+        </div>
+
+        <!-- Documentation Section -->
+        <section class="docs-section">
+            <h2>📚 Documentation & Resources</h2>
+            
+            <div class="docs-grid">
+                <a href="README.md" class="doc-card">
+                    <h3>📖 Getting Started</h3>
+                    <p>Complete guide to using the disposable email domains detector, including setup instructions and best practices.</p>
+                </a>
+                
+                <a href="API.md" class="doc-card">
+                    <h3>🔌 API Reference</h3>
+                    <p>Comprehensive API documentation with endpoints, examples, and integration guides for developers.</p>
+                </a>
+                
+                <a href="STATS.md" class="doc-card">
+                    <h3>📊 Statistics</h3>
+                    <p>Live statistics about domain counts, data sources, update frequencies, and service performance metrics.</p>
+                </a>
+                
+                <a href="CHANGELOG.md" class="doc-card">
+                    <h3>📝 Changelog</h3>
+                    <p>Track updates, new features, and improvements to the disposable email domains detection service.</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-logo">
+                <a href="https://vegastack.com/?utm_source=disposable-emails-detector.vegastack.com" target="_blank">
+                    <img src="https://cms.vegastack.com/assets/fc69b916-7eea-4721-b0d0-10f95d59809c.png?width=200&quality=100" alt="VegaStack Logo" />
+                </a>
+            </div>
+            <p>Created and maintained by <a href="https://vegastack.com/?utm_source=disposable-emails-detector.vegastack.com" target="_blank">VegaStack</a></p>
+            <p style="margin-top: 1rem;">
+                <a href="https://github.com/VegaStack/disposable-emails-detector" target="_blank" class="github-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    Star on GitHub
+                </a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        let domainsData = null;
+        let statsData = null;
+        
+        // Load API data on page load
+        async function loadData() {
+            try {
+                // Determine base URL - use deployed site if running locally
+                const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+                const baseUrl = isLocal ? 'https://disposable-emails-detector.vegastack.com' : '';
+                
+                const [domainsResponse, statsResponse] = await Promise.all([
+                    fetch(`${baseUrl}/api/check.json`),
+                    fetch(`${baseUrl}/api/stats.json`)
+                ]);
+                
+                if (!domainsResponse.ok || !statsResponse.ok) {
+                    throw new Error('Failed to fetch API data');
+                }
+                
+                domainsData = await domainsResponse.json();
+                statsData = await statsResponse.json();
+                
+                updateStats();
+                
+                // Check if domain is provided in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const domainParam = urlParams.get('domain');
+                if (domainParam) {
+                    document.getElementById('domainInput').value = domainParam;
+                    checkDomain();
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('stats').innerHTML = `
+                    <div style="color: var(--foreground-orange); font-weight: 500;">
+                        <strong>⚠️ Error loading API data</strong><br>
+                        ${error.message}<br>
+                        <small style="color: var(--secondary-foreground);">API URL: ${baseUrl || 'current domain'}/api/check.json</small><br>
+                        <small style="color: var(--secondary-foreground);">Please try refreshing the page or check your internet connection.</small>
+                    </div>
+                `;
+            }
+        }
+        
+        function updateStats() {
+            if (statsData) {
+                const statsDiv = document.getElementById('stats');
+                statsDiv.innerHTML = `
+                    <div style="color: var(--secondary-foreground);">
+                        <strong style="color: var(--foreground);">📊 Email Domain Database:</strong><br>
+                        <strong style="color: var(--foreground);">${statsData.count.toLocaleString()}</strong> disposable email domains tracked<br>
+                        <strong style="color: var(--foreground);">Last updated:</strong> ${new Date(statsData.updated).toLocaleString()}<br>
+                    </div>
+                `;
+            }
+        }
+        
+        function checkDomain() {
+            const input = document.getElementById('domainInput');
+            const result = document.getElementById('result');
+            const button = document.getElementById('checkBtn');
+            
+            let domain = input.value.trim().toLowerCase();
+            
+            if (!domain) {
+                showResult('Please enter an email domain or email address', 'error');
+                return;
+            }
+            
+            // Extract domain from email if provided
+            if (domain.includes('@')) {
+                domain = domain.split('@')[1];
+            }
+            
+            // Remove protocol if provided
+            domain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '');
+            
+            if (!domainsData) {
+                showResult('❌ API data not available. Please wait for the page to load or refresh.', 'error');
+                return;
+            }
+            
+            button.disabled = true;
+            button.textContent = 'Checking Email Domain...';
+            
+            setTimeout(() => {
+                const isDisposable = domainsData.domains[domain] === 1;
+                
+                if (isDisposable) {
+                    showResult(`🚫 <strong>${domain}</strong> is a disposable email domain`, 'disposable');
+                } else {
+                    showResult(`✅ <strong>${domain}</strong> appears to be a legitimate email domain`, 'clean');
+                }
+                
+                // Update URL with domain parameter
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('domain', domain);
+                window.history.replaceState({}, '', newUrl);
+                
+                // Show shareable URL
+                const shareUrl = `${window.location.origin}/?domain=${encodeURIComponent(domain)}`;
+                result.innerHTML += `<div class="share-url"><strong>🔗 Share this check:</strong><br>${shareUrl}</div>`;
+                
+                button.disabled = false;
+                button.textContent = 'Check Email Domain';
+            }, 300);
+        }
+        
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.innerHTML = message;
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('domainInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkDomain();
+            }
+        });
+        
+        // Load data when page loads
+        loadData();
+    </script>
+</body>
+</html> 
