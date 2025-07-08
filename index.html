@@ -185,6 +185,8 @@
             color: var(--secondary-foreground);
         }
         
+
+        
         /* Documentation Section */
         .docs-section {
             border-top: 1px solid var(--border);
@@ -353,13 +355,13 @@
                 </a>
             </div>
             <h1>🛡️ Disposable Email Domains Detector <span style="color: var(--secondary-foreground); font-weight: 500;">by <a href="https://vegastack.com/?utm_source=disposable-emails-detector.vegastack.com" target="_blank" style="color: inherit; text-decoration: none;">VegaStack</a></span></h1>
-            <p>Detect and block disposable email domains instantly. Our service identifies temporary email services to improve data quality, enhance security, and reduce spam with our comprehensive database of 100k+ tracked email domains.</p>
+            <p>Detect and block disposable email domains instantly, including subdomains and sub-subdomains. Our service identifies temporary email services to improve data quality, enhance security, and reduce spam with our comprehensive database of 100k+ tracked email domains.</p>
         </section>
 
         <!-- Domain Checker Card -->
         <div class="checker-card">
             <div class="input-group">
-                <input type="text" id="domainInput" placeholder="Enter email domain or full email (e.g., 10minutemail.com or user@tempmail.org)" />
+                <input type="text" id="domainInput" placeholder="Enter email, domain, or subdomain (e.g., user@mail.tempmail.org, mail.tempmail.org, or tempmail.org)" />
             </div>
             
             <button onclick="checkDomain()" id="checkBtn">Check Email Domain</button>
@@ -421,24 +423,169 @@
         let domainsData = null;
         let statsData = null;
         
+        // Common top-level domains that require special handling for subdomain extraction
+        const multiPartTLDs = [
+            'co.uk', 'co.za', 'co.in', 'co.jp', 'co.kr', 'co.nz', 'co.th', 'co.id',
+            'com.au', 'com.br', 'com.cn', 'com.mx', 'com.tr', 'com.tw', 'com.ua',
+            'net.au', 'org.uk', 'ac.uk', 'gov.uk', 'edu.au', 'gov.au',
+            'ne.jp', 'or.jp', 'go.jp', 'ac.jp', 'ad.jp'
+        ];
+        
+        /**
+         * Extract parent domain from subdomain or sub-subdomain
+         * Examples:
+         * - mail.example.com -> example.com
+         * - sub.mail.example.com -> example.com  
+         * - test.example.co.uk -> example.co.uk
+         * - www.subdomain.example.org -> example.org
+         */
+        function extractParentDomain(domain) {
+            if (!domain || typeof domain !== 'string') {
+                return domain;
+            }
+            
+            // Clean the domain
+            domain = domain.toLowerCase().trim();
+            
+            // Remove protocol if present
+            domain = domain.replace(/^https?:\/\//, '');
+            
+            // Remove www prefix
+            domain = domain.replace(/^www\./, '');
+            
+            // Remove trailing slash and path
+            domain = domain.split('/')[0];
+            
+            // Remove port if present
+            domain = domain.split(':')[0];
+            
+            // Split into parts
+            const parts = domain.split('.');
+            
+            // If it's already a simple domain (2 parts), return as-is
+            if (parts.length <= 2) {
+                return domain;
+            }
+            
+            // Check for multi-part TLDs first
+            for (const tld of multiPartTLDs) {
+                if (domain.endsWith('.' + tld)) {
+                    const tldParts = tld.split('.');
+                    const requiredParts = tldParts.length + 1; // TLD parts + domain name
+                    
+                    if (parts.length >= requiredParts) {
+                        return parts.slice(-requiredParts).join('.');
+                    }
+                    break;
+                }
+            }
+            
+            // For regular TLDs, return last 2 parts (domain.tld)
+            return parts.slice(-2).join('.');
+        }
+        
+        /**
+         * Validate email address format
+         */
+        function isValidEmail(email) {
+            const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+            return emailRegex.test(email);
+        }
+        
+        /**
+         * Validate domain format
+         */
+        function isValidDomain(domain) {
+            // Basic domain validation
+            const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+            return domainRegex.test(domain) && domain.length <= 253 && domain.includes('.');
+        }
+        
+        /**
+         * Extract and validate domain from user input
+         */
+        function extractAndValidateDomain(input) {
+            if (!input || typeof input !== 'string') {
+                return { valid: false, error: 'Please enter an email address or domain' };
+            }
+            
+            input = input.trim().toLowerCase();
+            
+            if (!input) {
+                return { valid: false, error: 'Please enter an email address or domain' };
+            }
+            
+            let domain = '';
+            let inputType = '';
+            
+            // Check if input is an email
+            if (input.includes('@')) {
+                if (!isValidEmail(input)) {
+                    return { valid: false, error: 'Invalid email address format' };
+                }
+                domain = input.split('@')[1];
+                inputType = 'email';
+            } else {
+                // Input is a domain
+                if (!isValidDomain(input)) {
+                    return { valid: false, error: 'Invalid domain format' };
+                }
+                domain = input;
+                inputType = 'domain';
+            }
+            
+            // Extract parent domain to handle subdomains
+            const parentDomain = extractParentDomain(domain);
+            
+            return {
+                valid: true,
+                originalInput: input,
+                extractedDomain: domain,
+                parentDomain: parentDomain,
+                inputType: inputType
+            };
+        }
+        
         // Load API data on page load
         async function loadData() {
             try {
                 // Determine base URL - use deployed site if running locally
-                const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+                const isLocal = window.location.hostname === '127.0.0.1' || 
+                               window.location.hostname === 'localhost' ||
+                               window.location.hostname.startsWith('127.0.0.1');
                 const baseUrl = isLocal ? 'https://disposable-emails-detector.vegastack.com' : '';
+                
+                console.log('Loading data...', { 
+                    hostname: window.location.hostname, 
+                    isLocal, 
+                    baseUrl,
+                    fullApiUrl: `${baseUrl}/api/check.json`
+                });
                 
                 const [domainsResponse, statsResponse] = await Promise.all([
                     fetch(`${baseUrl}/api/check.json`),
                     fetch(`${baseUrl}/api/stats.json`)
                 ]);
                 
+                console.log('API responses:', {
+                    domainsOk: domainsResponse.ok,
+                    statsOk: statsResponse.ok,
+                    domainsStatus: domainsResponse.status,
+                    statsStatus: statsResponse.status
+                });
+                
                 if (!domainsResponse.ok || !statsResponse.ok) {
-                    throw new Error('Failed to fetch API data');
+                    throw new Error(`Failed to fetch API data - Domains: ${domainsResponse.status}, Stats: ${statsResponse.status}`);
                 }
                 
                 domainsData = await domainsResponse.json();
                 statsData = await statsResponse.json();
+                
+                console.log('API data loaded:', {
+                    domainsCount: Object.keys(domainsData.domains || {}).length,
+                    statsCount: statsData.count,
+                    hasBinafex: domainsData.domains && domainsData.domains['binafex.com'] === 1
+                });
                 
                 updateStats();
                 
@@ -451,6 +598,37 @@
                 }
             } catch (error) {
                 console.error('Error loading data:', error);
+                
+                // Fallback to local files if deployed API fails
+                const localFallback = window.location.hostname === '127.0.0.1' || 
+                                     window.location.hostname === 'localhost' ||
+                                     window.location.hostname.startsWith('127.0.0.1');
+                if (localFallback) {
+                    console.log('Attempting fallback to local API files...');
+                    try {
+                        const [domainsResponse, statsResponse] = await Promise.all([
+                            fetch('./api/check.json'),
+                            fetch('./api/stats.json')
+                        ]);
+                        
+                        if (domainsResponse.ok && statsResponse.ok) {
+                            domainsData = await domainsResponse.json();
+                            statsData = await statsResponse.json();
+                            
+                            console.log('Local API data loaded:', {
+                                domainsCount: Object.keys(domainsData.domains || {}).length,
+                                statsCount: statsData.count,
+                                hasBinafex: domainsData.domains && domainsData.domains['binafex.com'] === 1
+                            });
+                            
+                            updateStats();
+                            return;
+                        }
+                    } catch (fallbackError) {
+                        console.error('Fallback also failed:', fallbackError);
+                    }
+                }
+                
                 document.getElementById('stats').innerHTML = `
                     <div style="color: var(--foreground-orange); font-weight: 500;">
                         <strong>⚠️ Error loading API data</strong><br>
@@ -480,20 +658,16 @@
             const result = document.getElementById('result');
             const button = document.getElementById('checkBtn');
             
-            let domain = input.value.trim().toLowerCase();
+            // Clear previous results
+            result.style.display = 'none';
             
-            if (!domain) {
-                showResult('Please enter an email domain or email address', 'error');
+            // Validate and extract domain from input
+            const validation = extractAndValidateDomain(input.value);
+            
+            if (!validation.valid) {
+                showResult(`❌ <strong>Invalid Input:</strong> ${validation.error}`, 'error');
                 return;
             }
-            
-            // Extract domain from email if provided
-            if (domain.includes('@')) {
-                domain = domain.split('@')[1];
-            }
-            
-            // Remove protocol if provided
-            domain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '');
             
             if (!domainsData) {
                 showResult('❌ API data not available. Please wait for the page to load or refresh.', 'error');
@@ -504,21 +678,99 @@
             button.textContent = 'Checking Email Domain...';
             
             setTimeout(() => {
-                const isDisposable = domainsData.domains[domain] === 1;
+                const { extractedDomain, parentDomain, inputType, originalInput } = validation;
                 
-                if (isDisposable) {
-                    showResult(`🚫 <strong>${domain}</strong> is a disposable email domain`, 'disposable');
-                } else {
-                    showResult(`✅ <strong>${domain}</strong> appears to be a legitimate email domain`, 'clean');
+                // Debug logging
+                console.log('Checking domain:', {
+                    originalInput,
+                    extractedDomain,
+                    parentDomain,
+                    inputType,
+                    domainsDataAvailable: !!domainsData,
+                    totalDomains: domainsData ? Object.keys(domainsData.domains || {}).length : 0
+                });
+                
+                // Check both the extracted domain and parent domain
+                const isExtractedDisposable = domainsData.domains[extractedDomain] === 1;
+                const isParentDisposable = domainsData.domains[parentDomain] === 1;
+                const isDisposable = isExtractedDisposable || isParentDisposable;
+                
+                console.log('Domain check results:', {
+                    extractedDomain,
+                    parentDomain,
+                    isExtractedDisposable,
+                    isParentDisposable,
+                    isDisposable,
+                    extractedDomainInData: extractedDomain in domainsData.domains,
+                    parentDomainInData: parentDomain in domainsData.domains,
+                    extractedDomainValue: domainsData.domains[extractedDomain],
+                    parentDomainValue: domainsData.domains[parentDomain]
+                });
+                
+                // Determine which domain was matched for better user feedback
+                let matchedDomain = extractedDomain;
+                if (!isExtractedDisposable && isParentDisposable) {
+                    matchedDomain = parentDomain;
                 }
                 
-                // Update URL with domain parameter
+                // Create detailed result message
+                let message = '';
+                let domainToShow = extractedDomain;
+                
+                if (inputType === 'email') {
+                    if (extractedDomain !== parentDomain) {
+                        // Subdomain detected
+                        if (isDisposable) {
+                            message = `🚫 <strong>${originalInput}</strong> uses a disposable email domain<br>`;
+                            message += `<small>Domain: <strong>${domainToShow}</strong>`;
+                            if (matchedDomain !== extractedDomain) {
+                                message += ` (parent domain <strong>${matchedDomain}</strong> is disposable)`;
+                            }
+                            message += `</small>`;
+                        } else {
+                            message = `✅ <strong>${originalInput}</strong> appears to be a legitimate email address<br>`;
+                            message += `<small>Domain: <strong>${domainToShow}</strong> (subdomain checked)</small>`;
+                        }
+                    } else {
+                        // Regular domain
+                        if (isDisposable) {
+                            message = `🚫 <strong>${originalInput}</strong> uses a disposable email domain`;
+                        } else {
+                            message = `✅ <strong>${originalInput}</strong> appears to be a legitimate email address`;
+                        }
+                    }
+                } else {
+                    // Domain input
+                    if (extractedDomain !== parentDomain) {
+                        // Subdomain detected
+                        if (isDisposable) {
+                            message = `🚫 <strong>${domainToShow}</strong> is a disposable email domain`;
+                            if (matchedDomain !== extractedDomain) {
+                                message += `<br><small>Parent domain <strong>${matchedDomain}</strong> is disposable</small>`;
+                            }
+                        } else {
+                            message = `✅ <strong>${domainToShow}</strong> appears to be a legitimate email domain<br>`;
+                            message += `<small>Subdomain checked (parent: <strong>${parentDomain}</strong>)</small>`;
+                        }
+                    } else {
+                        // Regular domain
+                        if (isDisposable) {
+                            message = `🚫 <strong>${domainToShow}</strong> is a disposable email domain`;
+                        } else {
+                            message = `✅ <strong>${domainToShow}</strong> appears to be a legitimate email domain`;
+                        }
+                    }
+                }
+                
+                showResult(message, isDisposable ? 'disposable' : 'clean');
+                
+                // Update URL with the extracted domain parameter
                 const newUrl = new URL(window.location);
-                newUrl.searchParams.set('domain', domain);
+                newUrl.searchParams.set('domain', domainToShow);
                 window.history.replaceState({}, '', newUrl);
                 
                 // Show shareable URL
-                const shareUrl = `${window.location.origin}/?domain=${encodeURIComponent(domain)}`;
+                const shareUrl = `${window.location.origin}/?domain=${encodeURIComponent(domainToShow)}`;
                 result.innerHTML += `<div class="share-url"><strong>🔗 Share this check:</strong><br>${shareUrl}</div>`;
                 
                 button.disabled = false;
@@ -532,6 +784,8 @@
             result.className = `result ${type}`;
             result.style.display = 'block';
         }
+        
+
         
         // Allow Enter key to submit
         document.getElementById('domainInput').addEventListener('keypress', function(e) {
