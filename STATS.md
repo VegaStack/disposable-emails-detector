@@ -1,9 +1,9 @@
 # Disposable Email Domains Statistics
 
 ## Current Status
-- **Total Domains**: 110140
-- **Last Updated**: 2025-09-09 01:09:19 UTC
-- **Change from Previous**: +110140
+- **Total Domains**: 110158
+- **Last Updated**: 2025-09-10 01:07:24 UTC
+- **Change from Previous**: +110158
 
 ## File Formats Available
 - **Text**: `disposable_email_domains_blocklist.txt`
@@ -16,8 +16,8 @@
 - **Raw Data**: https://disposable-emails-detector.vegastack.com/outputs/disposable_email_domains.json
 
 ## Sources Status
-- disposable_email_blocklist-2.txt: 71551 domains
-- disposable_email_blocklist-3.txt: 71551 domains
-- disposable_email_blocklist.txt: 4574 domains
-- stopforumspam_domains.txt: 62290 domains
+- disposable_email_blocklist-2.txt: 71553 domains
+- disposable_email_blocklist-3.txt: 71553 domains
+- disposable_email_blocklist.txt: 4583 domains
+- stopforumspam_domains.txt: 62312 domains
 
