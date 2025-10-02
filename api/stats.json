@@ -1,8 +1,8 @@
 {
   "v": "1.0",
   "endpoint": "https://disposable-emails-detector.vegastack.com",
-  "count": 110604,
-  "updated": "2025-10-01T01:16:53Z",
+  "count": 110589,
+  "updated": "2025-10-02T01:07:03Z",
   "sources": [4],
   "formats": ["txt", "json", "csv", "api"],
   "rate_limit": "100GB/month"
