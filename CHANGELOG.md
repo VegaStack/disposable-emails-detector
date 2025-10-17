@@ -1,4 +1,7 @@
 # Changelog
+## 2025-10-17
+- Updated blocklist with 111300 domains (change: +111300)
+
 ## 2025-10-16
 - Updated blocklist with 111072 domains (change: +111072)
 
