@@ -5249,6 +5249,7 @@
 9zjz7suyl.pl
 MAIL.CARSIK.COM
 Mail.chobler.com
+Temporary-Mail.net
 a-action.ru
 a-b.co.za
 a-bc.net
@@ -5287,6 +5288,7 @@ a.b.c.emlpro.com
 a.b.c.emltmp.com
 a.b.c.laste.ml
 a.barbiedreamhouse.club
+a.bc
 a.bdnets.com
 a.beardtrimmer.club
 a.beervape.com
@@ -6355,6 +6357,7 @@ adacalabuig.com
 adachiu.me
 adacplastics.com
 adadad.com
+adadad.uk
 adadass.cf
 adadass.ga
 adadass.gq
@@ -13202,6 +13205,7 @@ back.marksypark.com
 back.oldoutnewin.com
 back2barack.info
 back2bsback.com
+backToTopButton.style.display
 backalleybowling.info
 backalleydesigns.org
 backbone.works
@@ -16858,7 +16862,6 @@ bls-v.icu
 blsmail.xyz
 blssmly.com
 blst.gov
-blsyq.anonbox.net
 bltiwd.com
 blubaugh57.futuristicplanemodels.com
 bludoz.com
@@ -19589,6 +19592,7 @@ bzfads.space
 bzfr7.anonbox.net
 bzg.emlpro.com
 bzgiv.anonbox.net
+bzhpc.anonbox.net
 bzhzd.anonbox.net
 bzidohaoc3k.cf
 bzidohaoc3k.ga
@@ -25038,6 +25042,8 @@ copot.info
 copperemail.com
 copventnfulezas.tk
 copy5.com
+copyBtn.innerHTML
+copyTitle.textContent
 copyandart.de
 copycashvalve.com
 copycatmail.com
@@ -28633,6 +28639,7 @@ destinationsmoke.com
 destinedesigns.com
 destive.academy
 destive.world
+destroyLink.nextSibling.textContent
 destructiveblog.com
 destructocat.com
 destweb.com
@@ -30384,6 +30391,7 @@ docu.me
 docu2data.com
 documefml.com
 documenrsmail.ru
+document.cookie
 documentimail.com
 documentlegalisation.net
 documentsproducers.online
@@ -31973,6 +31981,7 @@ dy7fpcmwck.ml
 dy7fpcmwck.tk
 dyad-creative.com
 dyceroprojects.com
+dyclsr.xyz
 dye.emlhub.com
 dyeingmail.online
 dyemail.store
@@ -46787,6 +46796,7 @@ historioginf.com
 historiogramail.com
 historiogrmail.com
 histormails.ru
+historyLink.nextSibling.textContent
 historyinheels.com
 historykb.com
 historyship.ru
@@ -50808,6 +50818,7 @@ inpa-parket.com
 inpowiki.xyz
 inppares.org.pe
 inpsur.com
+inputRect.width
 inpwa.com
 inqling.org
 inqm.com
@@ -54024,6 +54035,7 @@ jsellsvfx.com
 jset.dropmail.me
 jsfc.emlhub.com
 jsfc88.com
+jsh55s.us
 jshiba.com
 jshongshuhan.com
 jshoppy.shop
@@ -60115,6 +60127,7 @@ loadednicetext.site
 loadedrarebooks.site
 loadfreshstuff.site
 loadfreshtexts.site
+loadingRow.innerHTML
 loadingsite.info
 loadingya.com
 loadlibbooks.site
@@ -60202,10 +60215,6 @@ locate.expert
 located6j.com
 locateme10.com
 locatesolar.com
-location.hash
-location.href.length
-location.pathname
-location.search
 locationans.ru
 locationlocationlocation.eu
 locationlose.com
@@ -67227,6 +67236,7 @@ modaborseprezzi.com
 modachane1borsee.com
 modafinilrezeptfrei.space
 modaiptv.com
+modal.dataset.showModal
 modalova.online
 modalsubstance.com
 modapeuterey2012.com
@@ -77312,6 +77322,7 @@ permail.online
 permail.site
 permail.store
 permalu.ru
+permanentTooltip.style.left
 permanentans.ru
 permcourier.com
 permeamail.ru
@@ -78695,7 +78706,6 @@ podam.pl
 podarbuke.ru
 podatnik.info
 podcastmarketingblueprint.com
-podeprom.es
 poderosa.com
 podgladaczgoogle.pl
 podhub.email
@@ -79476,8 +79486,10 @@ pp-ahbaab-al-ikhlash.com
 pp-ai.lol
 pp-ct.lol
 pp-gua.lol
+pp-gua.top
 pp-k1.lol
 pp-mc.lol
+pp-n1.lol
 pp-nn.lol
 pp-no.lol
 pp-tn.lol
@@ -83870,6 +83882,9 @@ refq.site
 refr.site
 reframedlife.com
 refrangimail.ru
+refreshButton.disabled
+refreshButton.innerHTML
+refreshText.textContent
 refrigerators.buzz
 refsa.site
 refsb.site
@@ -84349,6 +84364,7 @@ repyoutact.com
 reqaxv.com
 reqdocs.com
 requanague.site
+requestBody.domain
 requestmeds.com
 requestseven.online
 requiremyyl.ru
@@ -84439,6 +84455,7 @@ respectmail.online
 respekus.com
 respirml.ru
 respondcomment.com
+response.message
 responsibilmfri.com
 responsive.co.il
 resself.site
@@ -98884,6 +98901,7 @@ tqpxdj.us
 tqqun.com
 tqwagwknnm.pl
 tr-bet.com
+tr.unread
 tr23.com
 tr2k.cf
 tr2k.ga
@@ -101309,6 +101327,7 @@ unbelievamy.com
 unbelimail.com
 unbiex.com
 unblockedgamesrun.com
+uncensor.me
 uncensored.rf.gd
 uncensoredsurvival.com
 uncermail.com
@@ -106663,6 +106682,11 @@ windmaweek.tk
 windmine.tk
 windom.fun
 window-55.net
+window.adsbygoogle
+window.changeMailbox
+window.currentLang
+window.dataLayer
+window.location.href
 windowglassrepairs.xyz
 windowoffice7.com
 windows.sos.pl
@@ -111107,6 +111131,7 @@ zetgets.com
 zeth.emlpro.com
 zetia.in
 zetmail.com
+zettastore.my.id
 zettransport.pl
 zeubez.pr.rinaldo.id
 zeun.emltmp.com
@@ -112018,5 +112043,5 @@ zzzle.anonbox.net
 zzzmail.pl
 zzzz1717.com
 zzzzzzzzzzzzz.com
-zzzzzzzzzzzzz.com0-00.usa.cc
+zzzzzzzzzzzzz.com.tooltip.bottom
 zzzzzzzzzzzzz.com0-mail.com
