@@ -1,4 +1,7 @@
 # Changelog
+## 2026-02-20
+- Updated blocklist with 116326 domains (change: +116326)
+
 ## 2026-02-19
 - Updated blocklist with 116311 domains (change: +116311)
 
