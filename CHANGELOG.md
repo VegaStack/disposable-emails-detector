@@ -1,4 +1,7 @@
 # Changelog
+## 2026-08-08
+- Updated blocklist with 124610 domains (change: +124610)
+
 ## 2026-08-07
 - Updated blocklist with 124598 domains (change: +124598)
 
